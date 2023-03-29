@@ -1,23 +1,82 @@
+import { ValidationError } from 'joi'
 import { Context } from 'koa'
+import { nanoid } from 'nanoid'
+import { TaskInputDTO } from '../@types/dto'
+import ServiceError from '../errors/ServiceError'
+import Task from '../models/Task'
+import { taskCreateSchema, taskUpdateSchema } from '../schemas/task.schemas'
 
-function getAllTasks (ctx: Context) {
-  ctx.body = 'Get all tasks'
+async function getAllTasks (ctx: Context) {
+  const tasks = await Task.find()
+  const jsonTasks = tasks.map(task => task.toJSON())
+  ctx.body = jsonTasks
 }
 
-function getTask (ctx: Context) {
-  ctx.body = 'Get a task'
+async function getTask (ctx: Context) {
+  const id = ctx.params.id as string
+
+  const task = await Task.findOne({ id })
+
+  if (task) {
+    ctx.body = task.toJSON()
+  } else {
+    ctx.status = 404
+  }
 }
 
-function createTask (ctx: Context) {
-  ctx.body = 'Create a new task'
+async function createTask (ctx: Context) {
+  const payload = ctx.request.body as TaskInputDTO
+
+  try {
+    const validated: TaskInputDTO = await taskCreateSchema.validateAsync(payload)
+
+    const newTask = new Task({
+      id: nanoid(),
+      ...validated
+    })
+    const response = await newTask.save()
+    ctx.body = response
+    ctx.status = 201
+  } catch (err) {
+    const validationError = err as ValidationError
+    if (validationError.isJoi) {
+      throw new ServiceError(400, validationError.message)
+    }
+    throw err
+  }
 }
 
-function updateTask (ctx: Context) {
-  ctx.body = 'Update a task'
+async function updateTask (ctx: Context) {
+  const id = ctx.params.id as string
+  const payload = ctx.request.body as Partial<TaskInputDTO>
+
+  if (Object.values(payload).length === 0) {
+    throw new ServiceError(400, 'No data to update')
+  }
+
+  try {
+    const validated = await taskUpdateSchema.validateAsync(payload)
+
+    const updatedTask = await Task.findOneAndUpdate({ id }, validated, { new: true })
+
+    if (updatedTask) {
+      ctx.body = updatedTask.toJSON()
+    } else {
+      ctx.status = 404
+    }
+  } catch (err) {
+    const validationError = err as ValidationError
+    if (validationError.isJoi) {
+      throw new ServiceError(400, validationError.message)
+    }
+    throw err
+  }
 }
 
-function deleteTask (ctx: Context) {
-  ctx.body = 'Delete a task'
+async function deleteTask (ctx: Context) {
+  const id = ctx.params.id as string
+  await Task.findOneAndDelete({ id })
+  ctx.status = 204
 }
 
 export default {

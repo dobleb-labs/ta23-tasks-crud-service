@@ -15,15 +15,19 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@koa/router": "^12.0.0",
+    "@koa/router": "12.0.0",
+    "dotenv": "16.0.3",
+    "joi": "17.9.1",
     "koa": "2.14.1",
-    "koa-bodyparser": "^4.4.0"
+    "koa-bodyparser": "4.4.0",
+    "mongoose": "7.0.3",
+    "nanoid": "3.3.4"
   },
   "devDependencies": {
     "@types/jest": "29.5.0",
     "@types/koa": "2.13.5",
-    "@types/koa-bodyparser": "^4.3.10",
-    "@types/koa__router": "^12.0.0",
+    "@types/koa-bodyparser": "4.3.10",
+    "@types/koa__router": "12.0.0",
     "@types/node": "18.15.5",
     "@typescript-eslint/eslint-plugin": "5.56.0",
     "@typescript-eslint/parser": "5.56.0",
