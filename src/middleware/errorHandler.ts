@@ -11,5 +11,9 @@ export default async function errorHandler (ctx: Context, next: Next) {
     ctx.body = {
       message: validationError.message
     }
+
+    if (ctx.status === 500) {
+      console.error(err)
+    }
   }
 }
