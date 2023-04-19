@@ -8,6 +8,7 @@
     "dev": "nodemon src/index.ts",
     "build": "tsup src/index.ts --format cjs --minify",
     "lint": "tsc --noEmit && eslint '*/**/*.{js,ts}'",
+    "ci": "yarn --freeze-lockfile",
     "clean": "rm -rf node_modules && rm -rf dist",
     "test": "jest"
   },

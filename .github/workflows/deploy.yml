@@ -1,0 +1,39 @@
+name: Deploy App on VM with PM2
+on:
+  push:
+    tags:
+      - v*
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16.x'
+      - name: Install dependencies 🔧
+        run: yarn ci
+      - name: Build 🔨
+        run: yarn build
+      - name: Prepare for deploy 🚀
+        run: |
+          'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+          eval $(ssh-agent -s)
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          echo "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          tar cfz dist.tgz dist package.json yarn.lock
+      - name: Deploy 🚀
+        run: |
+          scp dist.tgz ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:~/dist.tgz
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd ~/ && tar xfz dist.tgz -C {{ secrets.SERVER_APP_PATH }}"
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd ~/ && yarn install --production"
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd ~/ && pm2 restart {{ secrets.SERVER_APP_NAME }}"
+      - name: Cleanup 🧹
+        run: |
+          rm -rf dist.tgz
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd ~/ && rm -rf dist.tgz"
