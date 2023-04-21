@@ -18,6 +18,8 @@ jobs:
         run: yarn ci
       - name: Build 🔨
         run: yarn build
+        env:
+          REACT_APP_API_BASE_URL: ${{ env.REACT_APP_API_BASE_URL }}
       - name: Prepare for deploy 🚀
         run: |
           eval $(ssh-agent -s)
