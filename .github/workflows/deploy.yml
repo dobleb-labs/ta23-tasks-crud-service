@@ -29,10 +29,9 @@ jobs:
       - name: Deploy 🚀
         run: |
           scp dist.tgz ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:~/dist.tgz
-          ssh ubuntu@ssh.dobleb.cf 'export PATH="$PATH:/home/ubuntu/.nvm/versions/node/v18.15.0/bin" && echo $PATH'
           ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} 'cd ~/ && tar xfz dist.tgz -C ${{ secrets.SERVER_APP_PATH }}'
-          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} 'cd ~/ && yarn install --production'
-          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} 'cd ~/ && pm2 restart ${{ secrets.SERVER_APP_NAME }}'
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} 'cd ~/ && export PATH="$PATH:/home/ubuntu/.nvm/versions/node/v18.15.0/bin" && yarn install --production'
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} 'cd ~/ && export PATH="$PATH:/home/ubuntu/.nvm/versions/node/v18.15.0/bin" && pm2 restart ${{ secrets.SERVER_APP_NAME }}'
       - name: Cleanup 🧹
         run: |
           rm -rf dist.tgz
