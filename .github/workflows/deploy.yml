@@ -20,7 +20,6 @@ jobs:
         run: yarn build
       - name: Prepare for deploy 🚀
         run: |
-          'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
           eval $(ssh-agent -s)
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
