@@ -6,6 +6,8 @@ import cors from '@koa/cors'
 import errorHandler from './middleware/errorHandler'
 import router from './routes'
 
+const PORT = process.env.PORT || 4000
+
 dotenv.config()
 
 const app = new Koa()
@@ -20,8 +22,8 @@ app.use(router.allowedMethods())
 mongoose.connect(process.env.MONGO_URI || '')
   .then(() => {
     console.log('Connected to MongoDB')
-    app.listen(4000, () => {
-      console.log('Server is running on port 4000')
+    app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`)
     })
   })
   .catch(err => {
