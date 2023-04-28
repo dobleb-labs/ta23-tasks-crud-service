@@ -7,6 +7,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://api.dobleb.cf
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -18,8 +21,6 @@ jobs:
         run: yarn ci
       - name: Build 🔨
         run: yarn build
-        env:
-          REACT_APP_API_BASE_URL: ${{ env.REACT_APP_API_BASE_URL }}
       - name: Prepare for deploy 🚀
         run: |
           eval $(ssh-agent -s)
@@ -31,9 +32,9 @@ jobs:
       - name: Deploy 🚀
         run: |
           scp dist.tgz ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:~/dist.tgz
-          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} 'cd ~/ && tar xfz dist.tgz -C ${{ secrets.SERVER_APP_PATH }}'
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} 'cd ~/ && tar xfz dist.tgz -C ${{ vars.SERVER_APP_PATH }}'
           ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} 'cd ~/ && export PATH="$PATH:/home/ubuntu/.nvm/versions/node/v18.15.0/bin" && yarn install --production'
-          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} 'cd ~/ && export PATH="$PATH:/home/ubuntu/.nvm/versions/node/v18.15.0/bin" && pm2 restart "${{ secrets.SERVER_APP_NAME }}"'
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} 'cd ~/ && export PATH="$PATH:/home/ubuntu/.nvm/versions/node/v18.15.0/bin" && pm2 restart "${{ vars.SERVER_APP_NAME }}"'
       - name: Cleanup 🧹
         run: |
           rm -rf dist.tgz
